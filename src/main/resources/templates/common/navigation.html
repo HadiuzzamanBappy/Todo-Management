@@ -1,0 +1,58 @@
+<!-- The provided code snippet is an HTML structure for a navigation bar (navbar) commonly used in web
+development. Here's a breakdown of its components: -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light p-4">
+    <div class="container d-flex">
+        <div class="flex-grow-1 d-flex justify-content-between">
+            <a th:href="@{/}" class="navbar-brand">
+                <h3 class="m-0">
+                    <strong>Todo</strong>
+                </h3>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse flex-grow-1 justify-content-between text-center"
+            id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/list-todos}">Todos</a>
+                </li>
+                <li th:if="${loggedInUserRole != 'USER'}" class="nav-item">
+                    <a class="nav-link" th:href="@{/list-users}">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/notifications/view}">Notification</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right d-flex gap-3 align-items-stretch">
+                <li class="d-flex align-items-stretch">
+                    <div class="dropdown d-flex align-items-stretch">
+                        <button class="btn btn-outline-secondary dropdown-toggle w-100" 
+                                type="button" 
+                                id="profileDrop"
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDrop">
+                            <li><a class="dropdown-item" th:href="@{/profile(id=${loggedInUserId})}">Profile</a></li>
+                            <li><a class="dropdown-item disabled" href="#">Settings</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="d-flex align-items-stretch">
+                    <a class="btn btn-danger w-100 d-flex align-items-center justify-content-center" 
+                       th:href="@{/logout}">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

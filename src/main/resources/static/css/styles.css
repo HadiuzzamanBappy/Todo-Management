@@ -1,0 +1,47 @@
+body {
+  background-color: #f8f9fa;
+  font-family: Arial, sans-serif;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #111;
+  opacity: 0.25;
+}
+
+.separator:not(:empty)::before {
+  margin-right: 1em;
+}
+
+.separator:not(:empty)::after {
+  margin-left: 1em;
+}
+
+
+
+
+.status-pending {
+  background-color: #17a2b8;
+  /* Info color */
+  color: white;
+}
+
+.status-in_progress {
+  background-color: #ffc107;
+  /* Warning color */
+  color: black;
+}
+
+.status-completed {
+  background-color: #28a745;
+  /* Success color */
+  color: white;
+}

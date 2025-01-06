@@ -1,0 +1,109 @@
+<div th:insert="~{common/header}"></div>
+<div th:insert="~{common/navigation}"></div>
+
+<div class="container flex-grow-1 align-content-start py-3">
+    <div class="panel-body py-3">
+        <div class="panel panel-default d-flex flex-column gap-3">
+            <div class="panel-heading d-flex justify-content-between">
+                <h4>All Notifications</h4>
+                <div class="d-flex gap-3 align-items-center">
+                    <form th:action="@{/notifications/view}" method="get" class="d-inline m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" id="filterAll" name="status" value=""
+                                th:checked="${filterStatus == null}" onchange="this.form.submit()">
+                            <label class="btn btn-sm btn-outline-primary" for="filterAll">All</label>
+
+                            <input type="radio" class="btn-check" id="filterRead" name="status" value="READ"
+                                th:checked="${filterStatus == true}" onchange="this.form.submit()">
+                            <label class="btn btn-sm btn-outline-success" for="filterRead">Read</label>
+
+                            <input type="radio" class="btn-check" id="filterUnread" name="status" value="UNREAD"
+                                th:checked="${filterStatus == false}" onchange="this.form.submit()">
+                            <label class="btn btn-sm btn-outline-danger" for="filterUnread">Unread</label>
+                        </div>
+                    </form>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#broadcastModal" th:if="${loggedInUserRole == 'ADMIN'}">
+                        <i class="bi bi-plus"></i> Add Broadcast Message
+                    </button>
+                </div>
+            </div>
+
+            <!-- View: Display all notifications -->
+            <div class="list-group">
+                <div th:each="notification : ${notifications}"
+                    class="list-group-item d-flex mb-2 p-3 rounded justify-content-between align-items-center shadow-sm">
+                    <div class="d-flex flex-column gap-1">
+                        <span class="mb-1" th:text="${notification.message}"></span>
+                        <div class="d-flex align-items-center gap-2">
+                            <p class="mb-0 small text-muted badge bg-light border rounded"
+                                th:text="${notification.type.name()}"></p>
+                            <p class="mb-0 small text-muted badge bg-light"
+                                th:if="${notification.user != null && loggedInUserRole == 'ADMIN'}"
+                                th:text="${'to ' + notification.user.name}"></p>
+                            <small class="text-muted"
+                                th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy ''at'' hh:mm a')}"></small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-success"
+                            th:if="${(notification.user == null || notification.user.role == loggedInUserRole) && notification.status.name() == 'UNREAD'}"
+                            th:onclick="'location.href=\'/notifications/mark-as-read?id=' + ${notification.id} + '\''">
+                            <i class="bi bi-eye"></i> Read
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                            th:onclick="'location.href=\'/notifications/delete?id=' + ${notification.id} + '\''">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="broadcastModal" tabindex="-1" aria-labelledby="broadcastModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="broadcastModalLabel">Send Broadcast Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="broadcastForm" action="/notifications/broadcast" method="post" th:object="${Notification}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <!-- Message Input -->
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                    </div>
+                    <!-- Notification Type -->
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Notification Type</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="" disabled selected>Select Type</option>
+                            <option th:each="type : ${notificationTypes}" th:value="${type.name()}"
+                                th:text="${type.name()}"></option>
+                        </select>
+                    </div>
+                    <!-- Target User (Optional) -->
+                    <div class="mb-3">
+                        <label for="user" class="form-label">Target User (Optional)</label>
+                        <select class="form-select" id="user" name="user">
+                            <option value="" selected>All Users</option>
+                            <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}"></option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="broadcastForm" class="btn btn-primary">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:insert="~{common/footer}"></div>

@@ -1,0 +1,119 @@
+<div th:insert="~{common/header}"></div>
+<div th:insert="~{common/navigation}"></div>
+
+<div class="container flex-grow-1 align-content-start">
+    <div class="panel-body">
+        <div class="panel panel-default d-flex flex-column gap-3">
+            <!-- Alert -->
+            <div class="alert alert-light alert-dismissible fade show d-flex justify-content-between p-3" role="alert">
+                <div class="align-content-center">
+                    Welcome, <strong class="text-uppercase"><span th:text="${loggedInUsername}">User</span>!</strong>
+                </div>
+                <button class="close btn btn-outline-info" data-bs-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Overview -->
+            <div class="row g-3" th:if="${loggedInUserRole == 'ADMIN'}">
+                <div class="col-md-3 m-0">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Todos</h5>
+                            <p class="card-text" th:text="${totalTodos}"></p>
+                            <small>
+                                <span th:text="${completedTodos} + ' Completed'"></span>
+                                <span th:text="'| ' +${pendingTodos} + ' Pending'"></span>
+                                <span th:text="'| ' +${ongoingTodos} + ' Ongoing'"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 m-0">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Active Users</h5>
+                            <p class="card-text" th:text="${activeUsers}">45</p>
+                            <small>Total: <span th:text="${totalUsers}"></span> | Inactive: <span
+                                    th:text="${inactiveUsers}"></span></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 m-0">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body">
+                            <h5 class="card-title">Overdue Todos</h5>
+                            <p class="card-text" th:text="${overdueTodos}">25</p>
+                            <small>Keep track of overdue tasks</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 m-0">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">New Users</h5>
+                            <p class="card-text" th:text="${latestUsers}">25</p>
+                            <small>Recent registrations this week</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <a type="button" class="btn btn-primary btn-md w-100" th:href="@{/add-todo}"><i
+                                            class="bi bi-plus"></i> Add New Todo</a>
+                                </div>
+                                <div class="col-md-4">
+                                    <a type="button" class="btn btn-success w-100" th:href="@{/notifications/view}"><i
+                                            class="bi bi-eye"></i> View Notifications</a>
+                                </div>
+                                <div class="col-md-4">
+                                    <a th:if="${loggedInUserRole == 'ADMIN'}" type="button"
+                                        class="btn btn-secondary btn-md w-100" th:href="@{/add-user}"><i
+                                            class="bi bi-plus"></i> Add New User</a>
+                                    <a th:if="${loggedInUserRole == 'USER'}" type="button"
+                                        class="btn btn-secondary btn-md w-100"
+                                        th:href="@{/profile(id=${loggedInUserId})}"><i class="bi bi-gear"></i> Manage
+                                        Profile</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Recent Notifications
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between" th:each="notification : ${latestNotifications}">
+                                    <div>
+                                        <strong th:text="${notification.type} + ':'"></strong>
+                                        <span
+                                            th:text="${notification.message + '...'}"></span>
+                                    </div>
+                                    <span th:if="${notification.createdAt != null}" class="text-muted"
+                                        th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy ''at'' hh:mm a')}"></span>
+                                </li>
+                            </ul>
+                            <p th:if="${#lists.isEmpty(latestNotifications)}">No recent notifications.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:insert="~{common/footer}"></div>

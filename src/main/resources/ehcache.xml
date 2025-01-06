@@ -1,0 +1,10 @@
+<config xmlns="http://www.ehcache.org/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <cache alias="todos">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.util.List</value-type>
+        <expiry>
+            <ttl unit="seconds">300</ttl>
+        </expiry>
+        <heap unit="entries">100</heap>
+    </cache>
+</config>

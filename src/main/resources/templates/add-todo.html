@@ -1,0 +1,177 @@
+<div th:insert="~{common/header}"></div>
+<div th:insert="~{common/navigation}"></div>
+
+<div class="container-fluid flex-grow-1 align-content-center">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3><span th:text="${type}"></span> Todo</h3>
+                    <span class="text-secondary" th:if="${type == 'Update'}" th:object="${todo}"
+                        th:text="'Last Updated at ' + *{lastUpdated}"></span>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{${formAction}}" th:object="${todo}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" th:field="*{id}" />
+
+                        <div class="form-group mb-3">
+                            <label for="title" class="text-secondary font-weight-light">Title</label>
+                            <input type="text" class="form-control" id="title" th:field="*{title}"
+                                placeholder="Enter Todo title" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="description" class="text-secondary font-weight-light">Description</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="3"
+                                placeholder="Enter Todo description"></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="dueTime" class="text-secondary font-weight-light">Due Date</label>
+                            <input type="datetime-local" class="form-control" id="dueTime" name="dueTime"
+                                th:value="*{dueTime}" required />
+                        </div>
+
+                        <div
+                            class="form-group d-flex justify-content-between align-items-center p-2 border rounded mb-3">
+                            <label for="recurrence" class="text-secondary font-weight-light">Recurrence</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="once" th:field="*{recurrence}"
+                                        value="Once" checked="checked">
+                                    <label class="form-check-label" for="once">Once</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="daily" th:field="*{recurrence}"
+                                        value="Daily">
+                                    <label class="form-check-label" for="daily">Daily</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="weekly" th:field="*{recurrence}"
+                                        value="Weekly">
+                                    <label class="form-check-label" for="weekly">Weekly</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="monthly" th:field="*{recurrence}"
+                                        value="Monthly">
+                                    <label class="form-check-label" for="monthly">Monthly</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex gap-3">
+                            <div class="form-group flex-grow-1">
+                                <label for="priority" class="text-secondary font-weight-light">Priority</label>
+                                <select class="form-control" id="priority" th:field="*{priority}" required>
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HIGH">High</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group flex-grow-1">
+                                <label for="status" class="text-secondary font-weight-light">Status:</label>
+                                <select class="form-control" id="status" th:field="*{status}">
+                                    <option value="PENDING">Pending</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="IN_PROGRESS">In Progress</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group flex-grow-1">
+                                <label for="reminder" class="text-secondary font-weight-light">Notification (in
+                                    Hour)</label>
+                                <select class="form-control" id="reminder" th:field="*{reminder}" required>
+                                    <option value="" disabled selected>Select an hour</option>
+                                    <option th:each="hour : ${#numbers.sequence(1, 24)}" th:value="${hour}"
+                                        th:text="${hour}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="category" class="text-secondary font-weight-light">Category</label>
+                            <div class="d-flex">
+                                <select class="form-control" id="category" name="category" th:field="*{category}"
+                                    required>
+                                    <option value="" disabled selected>Select a category</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">
+                                    </option>
+                                </select>
+                                <button type="button" class="btn btn-info" id="toggleCategoryButton"
+                                    onclick="showCategoryInput()">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+
+                            <div id="newCategoryContainer" class="mt-2" style="display: none;">
+                                <div class="d-flex">
+                                    <input type="text" class="form-control" id="newCategory" name="newCategory"
+                                        placeholder="Enter new category" />
+                                    <button type="button" class="btn btn-outline-danger" onclick="closeNewCategory()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="tags" class="text-secondary font-weight-light">Tags</label>
+                            <div id="tagsContainer">
+                                <div class="input-group mb-2 d-flex" th:each="tag : ${todo.tags}">
+                                    <input type="text" class="form-control" name="allTags" th:value="${tag.name}" />
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeTag(this)">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </div>
+                                <div class="input-group mb-2 d-flex">
+                                    <input type="text" class="form-control" placeholder="Enter tag" name="allTags"
+                                        multiple />
+                                    <div class="input-group-append d-flex gap-3">
+                                        <button type="button" class="btn btn-info" onclick="addTag()">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="attachments">Attachments</label>
+                            <div id="attachmentsContainer">
+                                <!-- Existing Attachments -->
+                                <div class="input-group mb-2 d-flex" th:each="attachment : ${todo.attachments}">
+                                    <input type="hidden" name="existingAttachmentIds" th:value="${attachment.id}" />
+                                    <input type="text" class="form-control" name="existingAttachmentNames"
+                                        th:value="${attachment.fileName}" disabled />
+                                    <button type="button" class="btn btn-outline-danger"
+                                        onclick="removeAttachment(this)">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </div>
+
+                                <!-- New Attachments -->
+                                <div class="input-group mb-2 d-flex">
+                                    <input type="file" class="form-control" name="newAttachments" />
+                                    <div class="input-group-append d-flex gap-3">
+                                        <button type="button" class="btn btn-info" onclick="addAttachment(this)">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group d-flex">
+                            <button type="submit" class="btn btn-primary flex-grow-1"
+                                th:text="${type} + ' Todo'">Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:insert="~{common/footer}"></div>

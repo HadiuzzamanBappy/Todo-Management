@@ -1,0 +1,197 @@
+<div th:insert="~{common/header}"></div>
+<div th:insert="~{common/navigation}"></div>
+
+<div class="container flex-grow-1 align-content-start py-3">
+    <div class="panel-body py-3">
+        <div class="panel panel-default d-flex flex-column gap-3">
+            <div class="panel-heading d-flex justify-content-between">
+                <div>
+                    <h4>All Todos</h4>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary btn-md dropdown-toggle" type="button" id="filterDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-funnel"></i> Filter
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="filterDropdown">
+                            <form id="filterForm" th:action="@{/filter-todos}" method="get"
+                                class="d-flex flex-column m-0">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <!-- Priority Filter -->
+                                <div class="mb-2">
+                                    <label for="priority" class="form-label m-0 text-muted">Priority</label>
+                                    <select id="priority" name="priority" class="form-select">
+                                        <option value="" th:selected="${selectedPriority == null}">All</option>
+                                        <option value="HIGH" th:selected="${selectedPriority == 'HIGH'}">High</option>
+                                        <option value="MEDIUM" th:selected="${selectedPriority == 'MEDIUM'}">Medium
+                                        </option>
+                                        <option value="LOW" th:selected="${selectedPriority == 'LOW'}">Low</option>
+                                    </select>
+                                </div>
+
+                                <!-- Status Filter -->
+                                <div class="mb-2">
+                                    <label for="status" class="form-label m-0 text-muted">Status</label>
+                                    <select id="status" name="status" class="form-select">
+                                        <option value="" th:selected="${selectedStatus == null}">All</option>
+                                        <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Pending
+                                        </option>
+                                        <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">
+                                            Completed</option>
+                                        <option value="IN_PROGRESS" th:selected="${selectedStatus == 'IN_PROGRESS'}">In
+                                            Progress</option>
+                                    </select>
+                                </div>
+
+                                <!-- Category Filter -->
+                                <div class="mb-2">
+                                    <label for="category" class="form-label m-0 text-muted">Category</label>
+                                    <select id="category" name="category" class="form-select">
+                                        <option value="" th:selected="${selectedCategory == null}">All</option>
+                                        <option th:each="category : ${categories}" th:value="${category.name}"
+                                            th:selected="${selectedCategory == category.name}"
+                                            th:text="${category.name}">
+                                            <!-- Populated dynamically -->
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-flex mt-2">
+                                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Apply
+                                        Filters</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <a type="button" class="btn btn-primary" th:href="@{/add-todo}"><i class="bi bi-plus"></i>
+                        Add Todo</a>
+                </div>
+            </div>
+            <div class="my-2 d-flex gap-2"
+                th:if="${selectedPriority != null or selectedStatus != null or selectedCategory != null}">
+                <span class="text-secondary rounded border border-secondary p-2"
+                    th:if="${selectedPriority != null}">Priority: <strong th:text="${selectedPriority}"></strong></span>
+                <span class="text-secondary rounded border border-secondary p-2"
+                    th:if="${selectedStatus != null}">Status:
+                    <strong th:text="${selectedStatus}"></strong></span>
+                <span class="text-secondary rounded border border-secondary p-2"
+                    th:if="${selectedCategory != null}">Category: <strong th:text="${selectedCategory}"></strong></span>
+                <a type="button" class="btn btn-text text-danger" th:href="@{/list-todos}"><i
+                        class="bi bi-arrow-repeat"></i>
+                    Reset</a>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3 d-flex" th:each="todo : ${todos}">
+                    <div class="card flex-grow-1">
+                        <div class="card-body d-flex flex-column p-0 shadow">
+                            <!-- Header Section -->
+                            <div class="d-flex justify-content-between align-items-center card-header">
+                                <div>
+                                    <h6 class="card-title mb-1"><strong th:text="${todo.title}">Todo Title</strong></h6>
+                                    <code class="text-muted" th:text="${todo.userName} + ' &#x2022; '">Creator</code>
+                                    <code class="text-muted" th:text="${todo.category.name}">Category</code>
+                                </div>
+                                <div class="d-flex flex-column gap-1">
+                                    <span
+                                        th:classappend="'badge ' + ${todo.status.name() == 'COMPLETED' ? 'bg-success' : todo.status.name() == 'IN_PROGRESS' ? 'bg-info' : 'bg-warning'}">
+                                        <span th:text="${todo.status}">Pending</span>
+                                    </span>
+                                    <span
+                                        th:classappend="'border rounded badge ' + ${todo.priority.name() == 'HIGH' ? 'text-danger border-danger' : todo.priority.name() == 'MEDIUM' ? 'text-warning border-warning' : 'text-secondary border-secondary'}">
+                                        <span th:text="${todo.priority}">Priority</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Details Section -->
+                            <div class="my-3 px-3 flex-grow-1 d-flex flex-column justify-content-between">
+                                <p class="mb-3">
+                                    <span class="d-block"
+                                        th:text="${todo.description != null && !todo.description.isEmpty() ? todo.description : 'No description available'}">
+                                        Todo Description
+                                    </span>
+                                    <small class="d-block text-secondary"
+                                        th:text="'Due Date: '+${#temporals.format(todo.dueTime, 'dd MMM yyyy ''at'' HH:mm a')}">
+                                        2024-12-25
+                                    </small>
+                                    <span class="d-flex flex-column p-1" th:each="attachment : ${todo.attachments}">
+                                        <a href="/uploads/" th:href="'/uploads/' + ${attachment.filePath}"
+                                            target="_blank" class="mb-1 text-primary"
+                                            th:text="${' &#x2022; '+attachment.fileName}">
+                                            File
+                                        </a>
+                                    </span>
+                                </p>
+                                <p class="mb-1 d-flex flex-wrap gap-1">
+                                    <small class="badge text-secondary border rounded">
+                                        <i class="bi bi-clock"> </i>
+                                        <span th:text="${todo.recurrence}"></span>
+                                    </small>
+                                    <small class="badge text-secondary border rounded">
+                                        <i class="bi bi-alarm"></i>
+                                        <span
+                                            th:text="${todo.reminder != null ?' '+ todo.reminder + ' hour before' : 'No reminder set'}">2
+                                            hour before</span>
+                                    </small>
+                                    <small class="badge border rounded"
+                                        th:if="${todo.tags != null && !todo.tags.isEmpty()}">
+                                        <span class="bg-light text-secondary me-1" th:each="tag : ${todo.tags}"
+                                            th:text="'#' + ${tag.name} + ' '">Tag</span>
+                                    </small>
+                                </p>
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="px-3 py-2 d-flex justify-content-between gap-2 align-items-center card-footer">
+                                <div class="d-flex gap-2">
+                                    <a th:if="${todo.completionDate == null}" type="button"
+                                        class="btn btn-outline-secondary" th:href="@{/update-todo(id=${todo.id})}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a type="button" class="btn btn-outline-danger"
+                                        th:href="@{/delete-todo(id=${todo.id})}">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                                <a th:if="${todo.completionDate == null}" type="button" class="btn btn-success"
+                                    th:href="@{/complete-todo(id=${todo.id})}">
+                                    <i class="bi bi-check2-all"></i>
+                                </a>
+                                <small class="text-success" th:if="${todo.completionDate != null}"
+                                    th:text="'Completed on: ' + ${#temporals.format(todo.completionDate, 'dd MMM yyyy ''at'' HH:mm a')}">complete
+                                    date</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav aria-label="Page navigation" class="d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        <!-- Previous Button -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/list-todos(page=${currentPage} - 1)}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                
+                        <!-- Page Numbers -->
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/list-todos(page= ${i})}" th:text="${i + 1}"></a>
+                        </li>
+                
+                        <!-- Next Button -->
+                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/list-todos(page=${currentPage} + 1)}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:insert="~{common/footer}"></div>
