@@ -12,13 +12,8 @@ import org.springframework.stereotype.Service;
 import net.guides.todo.todo_management.todo_management_spring_boot.model.Users;
 import net.guides.todo.todo_management.todo_management_spring_boot.repository.UserRepository;
 
-/**
- * The `UserService` class in Java implements methods for user management such as finding users by ID,
- * email, or username, saving, updating, and deleting users, as well as retrieving user counts and
- * filtering users by status.
- */
 @Service
-public class UserService{
+public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -27,36 +22,50 @@ public class UserService{
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Cacheable(value = "users", key = "#userid")
+    // WRONG: The parameter is 'id', not 'userid'
+    // @Cacheable(value = "users", key = "#userid")
+    // CORRECT: The key now matches the parameter name 'id'
+    @Cacheable(value = "users", key = "#id")
     public Users findUserById(long id) {
         return userRepository.findById(id);
     }
 
-    @Cacheable(value = "users", key = "#useremail")
+    // WRONG: The parameter is 'email', not 'useremail'
+    // @Cacheable(value = "users", key = "#useremail")
+    // CORRECT: The key now matches the parameter name 'email'
+    @Cacheable(value = "users", key = "#email")
     public Users findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    // This one was already correct, no change needed.
     @Cacheable(value = "users", key = "#username")
     public Users findUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    @Cacheable(value = "users", key = "#userall")
+    // WRONG: No parameter named 'userall' exists in this method
+    // @Cacheable(value = "users", key = "#userall")
+    // CORRECT: Use a static string key (in single quotes) when there are no parameters
+    @Cacheable(value = "users", key = "'allUsers'")
     public List<Users> findAllUsers() {
-        List<Users> users = userRepository.findAll();
-
-        return users;
+        return userRepository.findAll();
     }
 
-    @Cacheable(value = "users", key = "#userpageable")
+    // WRONG: The parameter is 'pageable', not 'userpageable'
+    // @Cacheable(value = "users", key = "#userpageable")
+    // CORRECT: The key now references the page number and size for uniqueness
+    @Cacheable(value = "users", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<Users> findPageableAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
-    @Cacheable(value = "users", key = "#userstatus")
-    public Page<Users> filterUsersByStatus(Pageable pageable,boolean active) {
-        return userRepository.findByEnabled(pageable,active);
+    // WRONG: No parameter named 'userstatus' exists
+    // @Cacheable(value = "users", key = "#userstatus")
+    // CORRECT: The key now combines page info and the active status for a unique key
+    @Cacheable(value = "users", key = "#pageable.pageNumber + '-' + #active")
+    public Page<Users> filterUsersByStatus(Pageable pageable, boolean active) {
+        return userRepository.findByEnabled(pageable, active);
     }
 
     public boolean saveUser(Users user) {
@@ -66,15 +75,8 @@ public class UserService{
         if (userRepository.findByEmail(user.getEmail()) != null) {
             return false;
         }
-
-        try {
-            user.setLastLoggedIn(LocalDateTime.now());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        user.setLastLoggedIn(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         userRepository.save(user);
         return true;
     }

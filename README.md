@@ -2,6 +2,9 @@
 # Todo Management System
 A robust and user-friendly Todo Management System built using Spring Boot. This project offers role-based access control, notifications, and a suite of features for efficient task and user management.
 
+![Admin Preview](/uploads/demo/admin.png)
+![User Preview](/uploads/demo/user.png)
+
 ## Features
 
 ### User Management:
